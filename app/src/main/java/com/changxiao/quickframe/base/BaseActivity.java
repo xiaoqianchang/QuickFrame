@@ -5,10 +5,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
 
 import com.changxiao.quickframe.common.AppActivityManager;
+
+import butterknife.ButterKnife;
 
 
 /**
@@ -20,14 +24,23 @@ import com.changxiao.quickframe.common.AppActivityManager;
  */
 public abstract class BaseActivity extends AppCompatActivity {
 
+    protected final String TAG = BaseActivity.class.getSimpleName();
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(getLayoutResId());
+        ButterKnife.bind(this);
+        initPresenter();
         AppActivityManager.getAppManager().addActivity(this);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             setTranslucentStatus(true);
         }
+        Log.i(TAG, "onCreate");
     }
+
+    protected abstract int getLayoutResId();
+    protected abstract void initPresenter();
 
     @TargetApi(19)
     private void setTranslucentStatus(boolean on) {
@@ -43,19 +56,42 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.i(TAG, "onRestart");
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
+        Log.i(TAG, "onStart");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        Log.i(TAG, "onResume");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.i(TAG, "onPause");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.i(TAG, "onStop");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        ButterKnife.unbind(this);
         AppActivityManager.getAppManager().finishActivity(this);
         // 取消网络请求
+        Log.i(TAG, "onDestroy");
     }
+
 }
