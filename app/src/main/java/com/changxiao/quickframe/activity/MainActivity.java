@@ -1,9 +1,11 @@
-package com.changxiao.quickframe;
+package com.changxiao.quickframe.activity;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-public class MainActivity extends AppCompatActivity {
+import com.changxiao.quickframe.R;
+import com.changxiao.quickframe.base.BaseActivity;
+
+public class MainActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
