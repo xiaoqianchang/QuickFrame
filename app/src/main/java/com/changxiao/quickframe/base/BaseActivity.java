@@ -11,6 +11,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.changxiao.quickframe.common.AppActivityManager;
+import com.changxiao.quickframe.presenter.BasePresenter;
 
 import butterknife.ButterKnife;
 
@@ -22,14 +23,14 @@ import butterknife.ButterKnife;
  *
  * @version 1.0
  */
-public abstract class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity<T extends BasePresenter> extends AppCompatActivity {
 
     protected final String TAG = BaseActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(getLayoutResId());
+        setContentView(getContentViewId());
         ButterKnife.bind(this);
         initPresenter();
         AppActivityManager.getAppManager().addActivity(this);
@@ -39,7 +40,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         Log.i(TAG, "onCreate");
     }
 
-    protected abstract int getLayoutResId();
+    protected abstract int getContentViewId();
     protected abstract void initPresenter();
 
     @TargetApi(19)

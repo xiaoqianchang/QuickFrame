@@ -3,6 +3,11 @@ package com.changxiao.quickframe.base;
 import android.app.Application;
 import android.content.Context;
 
+import com.changxiao.quickframe.utils.BuildConfig;
+import com.orhanobut.logger.LogLevel;
+import com.orhanobut.logger.Logger;
+import com.squareup.leakcanary.LeakCanary;
+
 /**
  * Custom application.
  * <p>
@@ -12,11 +17,24 @@ import android.content.Context;
  */
 public class ZRApplication extends Application {
 
+    private static final String TAG = "QuickFrame";
+
     public static Context applicationContext;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        applicationContext = this;
+        applicationContext = getApplicationContext();
+        LeakCanary.install(this);
+
+        // Logger Settings
+        // Note: Use LogLevel.NONE for the release versions.
+        Logger
+                .init(TAG)                       // default PRETTYLOGGER or use just init()
+                .methodCount(2)                 // default 2
+                .hideThreadInfo()               // default shown
+                .logLevel(BuildConfig.DEBUG ? LogLevel.FULL : LogLevel.NONE) // default LogLevel.FULL
+                .methodOffset(2);               // default 0
+
     }
 }
