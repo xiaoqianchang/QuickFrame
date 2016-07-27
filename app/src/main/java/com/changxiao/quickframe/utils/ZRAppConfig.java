@@ -11,7 +11,7 @@ package com.changxiao.quickframe.utils;
 public class ZRAppConfig {
 
     // 服务器数据地址
-    public static final String SERVER_URL = "http://172.16.101.91:9000/";
+    public static final String SERVER_URL = "http://gank.io/api/";
 
     public static String WORK_FOLDER = ZRFileUtils.getWorkFolder();
 

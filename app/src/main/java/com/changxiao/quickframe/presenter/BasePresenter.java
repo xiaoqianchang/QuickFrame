@@ -28,5 +28,8 @@ public abstract class BasePresenter<T extends IBaseView> {
         iView.initView();
     }
 
+    /**
+     * Presenter释放资源
+     */
     public abstract void release();
 }

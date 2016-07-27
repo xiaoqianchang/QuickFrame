@@ -1,5 +1,7 @@
 package com.changxiao.quickframe.http;
 
+import com.changxiao.quickframe.bean.MeiziData;
+
 import java.util.Map;
 
 import retrofit2.Callback;
@@ -7,6 +9,7 @@ import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 import rx.Observable;
 
@@ -40,4 +43,7 @@ public interface ZRNetApi {
     @POST("pushmsg")
     Observable<Object> pushMsg(@FieldMap Map<String, Object> params);
 
+    // http://gank.io/api/data/数据类型/请求个数/第几页
+    @GET(value = "data/福利/" + 10 + "/{page}")
+    Observable<MeiziData> getMeiziData(@Path("page") int page);
 }

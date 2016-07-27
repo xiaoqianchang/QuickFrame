@@ -33,6 +33,21 @@ public class ZRToastFactory {
         return toast;
     }
 
+    /**
+     * 显示Toast
+     *
+     * @param context
+     * @param content
+     */
+    public static void showToast(Context context, String content) {
+        if (null == toast) {
+            toast = Toast.makeText(context, content, Toast.LENGTH_SHORT);
+        } else {
+            toast.setText(content);
+        }
+        toast.show();
+    }
+
     public static void cancelToast() {
         if (toast != null) {
             toast.cancel();
