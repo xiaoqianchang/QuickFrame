@@ -14,6 +14,7 @@ import com.changxiao.quickframe.presenter.MainPresenter;
 import com.changxiao.quickframe.utils.SnackbarUtils;
 import com.changxiao.quickframe.utils.ZRToastFactory;
 import com.changxiao.quickframe.widget.XCRecyclerView;
+import com.orhanobut.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +46,7 @@ public class MainActivity extends ToolBarActivity<MainPresenter> implements IMai
     protected void initPresenter() {
         this.mMainPresenter = new MainPresenter(this, this);
         this.mMainPresenter.init();
+        Logger.e("ssssssssssssss");
     }
 
     @Override

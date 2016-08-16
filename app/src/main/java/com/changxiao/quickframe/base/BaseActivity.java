@@ -30,6 +30,7 @@ public abstract class BaseActivity<T extends BasePresenter> extends AppCompatAct
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(TAG, "onCreate");
         setContentView(getContentViewId());
         ButterKnife.bind(this);
         initPresenter();
@@ -37,7 +38,6 @@ public abstract class BaseActivity<T extends BasePresenter> extends AppCompatAct
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             setTranslucentStatus(true);
         }
-        Log.i(TAG, "onCreate");
     }
 
     protected abstract int getContentViewId();
