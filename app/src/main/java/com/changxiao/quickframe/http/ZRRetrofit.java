@@ -56,11 +56,15 @@ public class ZRRetrofit {
         // OkHttp3
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        client = new OkHttpClient.Builder()
+        new OkHttpClient().newBuilder();
+        client = new OkHttpClient.Builder() // 这种方式属性有默认值
                 // print Log
-                .addInterceptor(interceptor)
-                // 设置出现错误进行重新连接
-                .retryOnConnectionFailure(true)
+//                .addInterceptor(interceptor)
+//                .addInterceptor(new LoggingInterceptor())
+                .addNetworkInterceptor(new LoggingInterceptor())
+//                .addNetworkInterceptor(new LogInterceptor())
+                // 设置出现错误进行重新连接(慎用)
+                .retryOnConnectionFailure(false)
                 // set time out interval
                 .readTimeout(10, TimeUnit.SECONDS)
                 .connectTimeout(10, TimeUnit.SECONDS)
@@ -95,7 +99,7 @@ public class ZRRetrofit {
             if (null == mNetApi) {
                 Retrofit retrofit = builder
                         .client(client)
-                        .baseUrl(serverUrl)
+                        .baseUrl(serverUrl) // 注意：retrofit2.0后：BaseUrl要以/结尾；@GET 等请求不要以/开头；@Url: 可以定义完整url，不要以 / 开头。
                         .addConverterFactory(GsonConverterFactory.create(gson))
                         .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                         .build();
