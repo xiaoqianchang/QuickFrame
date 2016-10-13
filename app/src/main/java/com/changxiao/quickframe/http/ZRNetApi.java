@@ -1,16 +1,20 @@
 package com.changxiao.quickframe.http;
 
 import com.changxiao.quickframe.bean.MeiziData;
+import com.changxiao.quickframe.bean.response.Login;
 
 import java.util.Map;
 
+import retrofit2.Call;
 import retrofit2.Callback;
+import retrofit2.http.Field;
 import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+import retrofit2.http.Url;
 import rx.Observable;
 
 /**
@@ -46,4 +50,16 @@ public interface ZRNetApi {
     // http://gank.io/api/data/数据类型/请求个数/第几页
     @GET(value = "data/福利/" + 10 + "/{page}")
     Observable<MeiziData> getMeiziData(@Path("page") int page);
+
+    @FormUrlEncoded
+    @POST
+    Call<Login> loginCallbackByPost(
+            @Url String url
+            , @Field("sid") String sid
+            , @Field("deviceid") String deviceid
+            , @Field("rid") String rid
+            , @Field("loginName") String loginName
+            , @Field("password") String password
+            , @Field("ip") String ip
+    );
 }
