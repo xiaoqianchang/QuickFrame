@@ -95,7 +95,7 @@ public class ZRRetrofit {
             if (null == mNetApi) {
                 Retrofit retrofit = builder
                         .client(client)
-                        .baseUrl(serverUrl)
+                        .baseUrl(serverUrl) // baseUrl这里的服务地址必须以反斜杠(/)结尾，在NetApi里面的注解可以不用以(/)结尾、直接在@GET、@POST里面写/msgs
                         .addConverterFactory(GsonConverterFactory.create(gson))
                         .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                         .build();
