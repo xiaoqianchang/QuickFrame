@@ -5,6 +5,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
+import static com.changxiao.quickframe.utils.ZRStringUtils.replaceBlank;
+
 /**
  * $desc$
  * <p>
@@ -34,11 +36,16 @@ public class JsonFormatter {
      * @return
      */
     public static String jsonFormatter(String uglyJSONString){
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        JsonParser jp = new JsonParser();
-        JsonElement je = jp.parse(uglyJSONString);
-        String prettyJsonString = gson.toJson(je);
-        return prettyJsonString;
+        String jsonStr = replaceBlank(uglyJSONString);
+        try {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            JsonParser jp = new JsonParser();
+            JsonElement je = jp.parse(jsonStr);
+            String prettyJsonString = gson.toJson(je);
+            return prettyJsonString;
+        } catch (Exception e) {
+            return uglyJSONString;
+        }
     }
 
     /*********************下面是方法二*********************************/

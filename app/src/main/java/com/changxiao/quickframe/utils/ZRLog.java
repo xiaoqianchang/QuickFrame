@@ -19,9 +19,9 @@ import java.util.Comparator;
  */
 public class ZRLog {
 
-	private static final String TAG = "midas";
-	private static final String LOG_FILE_PREFIX = "mdsjr_" + ZRDeviceInfo.getClientVersionName() + "_log";
-	private static final String CRASH_FILE_PREFIX = "mdsjr_" + ZRDeviceInfo.getClientVersionName() + "_crash";
+	private static final String TAG = "quickframe";
+	private static final String LOG_FILE_PREFIX = "quickframe_" + ZRDeviceInfo.getClientVersionName() + "_log";
+	private static final String CRASH_FILE_PREFIX = "quickframe_" + ZRDeviceInfo.getClientVersionName() + "_crash";
 
 	private static final int LOG_FILE_SIZE = 1024 * 1024 * 5;
 	private static final int LOG_FILE_MAX_COUNT = 8;

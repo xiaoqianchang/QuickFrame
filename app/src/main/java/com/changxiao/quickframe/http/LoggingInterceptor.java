@@ -32,7 +32,7 @@ public class LoggingInterceptor implements Interceptor {
         long endTime = System.nanoTime();
         Logger.d(String.format("Received response for %s in %.1fms%n%s%nresponseObject:%s",
                 response.request().url(), (endTime - startTime) / 1e6d, response.headers(),
-                JsonFormatter.jsonFormatter(ZRStringUtils.replaceBlank(response.body().string()))));
+                JsonFormatter.format(ZRStringUtils.replaceBlank(response.body().string()))));
 
         return response;
     }
