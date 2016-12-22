@@ -1,10 +1,50 @@
 apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
 
+def releaseTime() {
+    return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
+}
+
 android {
+    /**
+     * 设置编译 sdk 和编译工具的版本
+     */
     compileSdkVersion 23
     buildToolsVersion "23.0.3"
 
+    /**
+     * 关于签名, 请参考 google 官方文档 Sign Your App: https://developer.android.com/studio/publish/app-signing.html#debug-mode
+     */
+    signingConfigs {
+        /**
+         * As 会自动帮我们使用 debug certificate 进行签名. 这个 debug certificate 每次安装 As 都会变,
+         * 因此不适合作为发布之用.
+         */
+        debug {
+            // No debug config
+        }
+        /**
+         * 由于 Module-level Build Script(本文件) 也要放在 VCS 中管理, 所以不将密码等信息写在这里.
+         * 一般的做法是: 在本机设置环境变量, 然后通过下面代码中演示的这种方式读取.
+         * 当然, 最佳实践也指导我们将 `gradle.properties` 排除在 VCS 之外,
+         * 此时, 也在该文件中将密码设置为变量, 然后在此读取使用.
+         */
+        release {
+            /*storeFile file("$System.env.STORE_FILE")
+            storePassword "$System.env.STORE_PASSWORD"
+            keyAlias "$System.env.KEY_ALIAS"
+            keyPassword "$System.env.KEY_PASSWORD"*/
+
+            storeFile file('D:/AndroidStudioProjects/QuickFrame/app/src/main/res/raw/release.jks')
+            storePassword '920722'
+            keyAlias 'quickframe'
+            keyPassword '920722'
+        }
+    }
+
+    /**
+     * 为所有的 build variants 设置默认的值. 关于 build variant, 我们后面会用一张图片说明
+     */
     defaultConfig {
         applicationId "com.changxiao.quickframe"
         minSdkVersion 15
@@ -12,20 +52,131 @@ android {
         versionCode 1
         versionName "1.0"
 
+        // dex突破65535的限制
+        multiDexEnabled true
+        // 默认是umeng的渠道
+        manifestPlaceholders = [UMENG_CHANNEL_VALUE: "umeng"]
+
         // ADD THIS LINE:
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
+    /**
+     * type 默认会有 debug 和 release. 不管你写不写都如此.
+     * 通常, 我们在 debug 中保留默认值, release 中开启混淆, 并使用私有的签名
+     *
+     * 知识：打包指令
+     * ./gradlew assembleDebug
+     * ./gradlew assembleRelease
+     * 如果我们想打包wandoujia渠道的release版本，执行如下命令就好了：./gradlew assembleWandoujiaRelease
+     *
+     * 如果我们只打wandoujia渠道版本，则：./gradlew assembleWandoujia
+     *
+     * 打全部Release版本：./gradlew assembleRelease(这条命令会把Product Flavor下的所有渠道的Release版本都打出来。)
+     */
     buildTypes {
-        release {
+        debug {
+            // 使用默认值(不配置)
+            // 或者
+            // 显示Log
+            buildConfigField "boolean", "LOG_DEBUG", "true"
+
+            versionNameSuffix "-debug"
             minifyEnabled false
+            zipAlignEnabled false
+            shrinkResources false
+            signingConfig signingConfigs.debug
+        }
+
+        release {
+            // 不显示Log
+            buildConfigField "boolean", "LOG_DEBUG", "false"
+            // 混淆
+            minifyEnabled false
+//            zipAlignEnabled true
+            // 移除无用的resource文件
+//            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // 签名
+            signingConfig signingConfigs.release
+
+            // 批量打包
+            applicationVariants.all { variant ->
+                variant.outputs.each { output ->
+                    def outputFile = output.outputFile
+                    if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                        // 输出apk名称为quickframe_v1.0_2015-01-15_wandoujia.apk
+                        def fileName = "quickframe_v${defaultConfig.versionName}_${releaseTime()}_${variant.productFlavors[0].name}.apk"
+                        output.outputFile = new File(outputFile.parent, fileName)
+                    }
+                }
+            }
         }
     }
+
+    /**
+     * flavor 强调的是不同的版本, 比如付费版和免费版.
+     * 在国内, 这个字段更多被用于区分不同的渠道, 即 360 渠道, 小米渠道等等.
+     */
+    // 友盟多渠道打包
+    productFlavors {
+        baidu {}
+        yingyongbao {}
+        qihu360 {}
+        taobao {}
+        wandoujia {}
+        yingyonghui {}
+        mumayi {}
+        xiaomi {}
+        huawei {}
+        anzhi {}
+        jinliyiyonghui {}
+        youyi {}
+        jifeng {}
+        nduo {}
+        lenovo {}
+        meizu {}
+        vivio {}
+        oppo {}
+    }
+
+    productFlavors.all {flavor ->
+        flavor.manifestPlaceholders = [UMENG_CHANNEL_VALUE: name]
+    }
+
+    /**
+     * 这个选项基本不用.
+     * lt;a href="http://tools.android.com/tech-docs/new-build-system/user-guide/apk-splits"gt;官方说lt;/agt;: 使用 splits 可以比使用 flavor 更加有效创建多 apk.
+     * 目前而言, 仅支持 Density 和 ABIs 这两个分类.
+     */
+    /*splits {
+        // 按屏幕尺寸
+        density {
+            enable true
+
+            // 默认包含全部分辨率, 这里是剔除一些我们不要的
+            exclude "ldpi", "mdpi", "xxxhdpi", "400dpi", "560dpi", "tvdpi"
+        }
+
+        // 按架构
+        abi {
+            enable true
+
+            // 使用 `reset()` 后, 我们就相当于不包含任何架构,
+            // 这种情况下我们就可以通过 `include` 指定想要使用的架构
+            reset()
+
+            include 'x86', 'armeabi-v7a'
+            universalApk true       // 是否同时生成一个包含全部 Architecture 的包
+        }
+    }*/
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    // 溢出lint检测的error
     lintOptions {
         abortOnError false
     }
@@ -34,10 +185,16 @@ android {
     }
 }
 
+/**
+ * 这个项目的依赖
+ */
 dependencies {
-//    compile fileTree(dir: 'libs', include: ['*.jar'])
+    /**
+     * `fileTree` 导入 libs 目录下的所有 jar 文件
+     */
+    //    compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    testCompile "org.robolectric:robolectric:3.0"
+    testCompile 'org.robolectric:robolectric:3.0'
     compile 'com.android.support:appcompat-v7:23.4.0'
     compile 'com.android.support:design:23.4.0'
     compile 'com.android.support:cardview-v7:23.4.0'
@@ -54,4 +211,22 @@ dependencies {
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta1'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta1'
     testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta1'
+    /**
+     * 想导入本地 aar, 首先需要指明本地 aar 的位置, 如下 `repositories` 中所示, 我们把 aar 放在了
+     * Module-level 的 libs 目录下. 然后引用这个文件即可.
+     */
+    // compile(name: 'components', ext: 'aar')
+    // 编译依赖工程
+    //    compile project(':qrscan')
+    // 编译单独jar
+    //    compile files('libs/android-async-http-1.4.6.jar')
 }
+
+/**
+ * 配置了去哪里查找这个模块依赖文件
+ */
+/*repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}*/
