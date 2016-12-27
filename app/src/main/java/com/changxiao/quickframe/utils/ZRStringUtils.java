@@ -225,4 +225,17 @@ public class ZRStringUtils {
         }
         return dest;
     }
+
+    public static String jsonFormatter(String uglyJSONString){
+        String jsonStr = replaceBlank(uglyJSONString);
+        try {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            JsonParser jp = new JsonParser();
+            JsonElement je = jp.parse(jsonStr);
+            String prettyJsonString = gson.toJson(je);
+            return prettyJsonString;
+        } catch (Exception e) {
+            return uglyJSONString;
+        }
+    }
 }

@@ -1,5 +1,7 @@
 package com.changxiao.quickframe.http;
 
+import com.changxiao.quickframe.R;
+import com.changxiao.quickframe.base.ZRApplication;
 import com.changxiao.quickframe.utils.ZRAppConfig;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -25,14 +27,25 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class ZRRetrofit {
 
+    private static ZRRetrofit mInstance;
     private static Retrofit.Builder builder;
     private static ZRNetApi mNetApi;
     protected static final Object monitor = new Object();
+    private static OkHttpClient.Builder okHttpBuilder;
     private static OkHttpClient client;
     private static Gson gson;
 
+    private static FileUploadApi mFileUploadApi; // 文件上传
+
     private ZRRetrofit() {
 
+    }
+
+    public static ZRRetrofit getInstance() {
+        if (null == mInstance) {
+            mInstance = new ZRRetrofit();
+        }
+        return mInstance;
     }
 
     /**
@@ -47,17 +60,33 @@ public class ZRRetrofit {
                     .addHeader("Content-Type", "application/json")
                     .addHeader("Accept", "application/json")
                     .addHeader("charset", "utf-8")
+//                    .addHeader("Connection", "close")
                     .build();
             return chain.proceed(authorised);
         }
     };
 
     static {
+        // 证书
+        int[] certficates = new int[] {R.raw.duocaijr_com_crt};
         // OkHttp3
-        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        new OkHttpClient().newBuilder();
-        client = new OkHttpClient.Builder() // 这种方式属性有默认值
+        okHttpBuilder = new OkHttpClient().newBuilder();
+        if (ZRAppConfig.DEBUG) {
+            HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+            interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            okHttpBuilder.addInterceptor(interceptor);
+            // print Log
+//            okHttpBuilder.addInterceptor(new LoggingInterceptor());
+        }
+
+        okHttpBuilder.retryOnConnectionFailure(false);
+        okHttpBuilder.readTimeout(10, TimeUnit.SECONDS);
+        okHttpBuilder.connectTimeout(10, TimeUnit.SECONDS);
+        okHttpBuilder.addNetworkInterceptor(mTokenInterceptor);
+        // https支持
+//        okHttpBuilder.sslSocketFactory(SSLClientVerify.getSSLSocketFactory(ZRApplication.applicationContext, certficates));
+        client = okHttpBuilder.build();
+        /*client = new OkHttpClient.Builder() // 这种方式属性有默认值
                 // print Log
 //                .addInterceptor(interceptor)
 //                .addInterceptor(new LoggingInterceptor())
@@ -71,12 +100,25 @@ public class ZRRetrofit {
                 .writeTimeout(10, TimeUnit.SECONDS)
                 // 所有网络请求都附上你的拦截器
                 .addNetworkInterceptor(mTokenInterceptor)
-                .build();
+                .build();*/
 
         gson = new GsonBuilder()
                 .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
                 .create();
         builder = new Retrofit.Builder();
+    }
+
+    /**
+     * 设置连接超时时间
+     *
+     * @param timeOut
+     */
+    public void setConnectTimeout(int timeOut) {
+        okHttpBuilder.connectTimeout(timeOut, TimeUnit.SECONDS);
+    }
+
+    public void setReadTimeout(int timeOut) {
+        okHttpBuilder.readTimeout(timeOut, TimeUnit.SECONDS);
     }
 
     /**
@@ -96,16 +138,38 @@ public class ZRRetrofit {
      */
     public static ZRNetApi getNetApiInstance(String serverUrl) {
         synchronized (monitor) {
-            if (null == mNetApi) {
+            Retrofit retrofit = builder
+                    .client(client)
+                    .baseUrl(serverUrl) // 注意：retrofit2.0后：BaseUrl要以/结尾；@GET 等请求不要以/开头；@Url: 可以定义完整url，不要以 / 开头。
+                    .addConverterFactory(GsonConverterFactory.create(gson))
+                    .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                    .build();
+            mNetApi = retrofit.create(ZRNetApi.class);
+            return mNetApi;
+        }
+    }
+
+    /**
+     * FileUpoad NetApi instance
+     *
+     * @return
+     */
+    public static FileUploadApi getFileUploadApiInstance() {
+        return getFileUploadApiInstance(ZRAppConfig.SERVER_URL);
+    }
+
+    public static FileUploadApi getFileUploadApiInstance(String serverUrl) {
+        synchronized (monitor) {
+            if (null == mFileUploadApi) {
                 Retrofit retrofit = builder
                         .client(client)
-                        .baseUrl(serverUrl) // 注意：retrofit2.0后：BaseUrl要以/结尾；@GET 等请求不要以/开头；@Url: 可以定义完整url，不要以 / 开头。
-                        .addConverterFactory(GsonConverterFactory.create(gson))
+                        .baseUrl(serverUrl + "/")
+                        .addConverterFactory(GsonConverterFactory.create())
                         .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                         .build();
-                mNetApi = retrofit.create(ZRNetApi.class);
+                mFileUploadApi = retrofit.create(FileUploadApi.class);
             }
-            return mNetApi;
+            return mFileUploadApi;
         }
     }
 
