@@ -120,10 +120,11 @@ android {
      */
     // 友盟多渠道打包
     productFlavors {
-        baidu {}
+        colorfulfund {}
+        baidu {} // baidu、anzhuo、baidu91zhushou
         yingyongbao {}
         qihu360 {}
-        taobao {}
+        taobao {} // taobao、PP、UC、wandoujia
         wandoujia {}
         yingyonghui {}
         mumayi {}
@@ -138,6 +139,22 @@ android {
         meizu {}
         vivio {}
         oppo {}
+        chuizi {}
+        sanxing {}
+        leshi {}
+
+        duote {}
+        feifan {}
+        huajun {}
+        jinli {}
+        jiubang {}
+        sougou {}
+        taipingyang {}
+        tianyu {}
+        woshangdian {}
+        xiazaiba {}
+        yidongjidi {}
+        zhongguancun {}
     }
 
     productFlavors.all {flavor ->
